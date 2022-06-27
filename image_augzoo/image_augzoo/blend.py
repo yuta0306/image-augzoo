@@ -17,7 +17,13 @@ class Blend(DualTransform):
     rgb_range : float
     """
 
-    def __init__(self, p: float = 1.0, alpha: float = 0.6, rgb_range: float = 1.0):
+    def __init__(
+        self,
+        p: float = 1.0,
+        alpha: float = 0.6,
+        rgb_range: float = 1.0,
+        channel_first: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -37,8 +43,9 @@ class Blend(DualTransform):
         self.p = p
         self.alpha = alpha
         self.rgb_range = rgb_range
+        self.channel_first = channel_first
 
-    def __call__(self, *inputs, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def __call__(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
         if self.alpha <= 0 or np.random.rand(1) >= self.p:
             return inputs
 
