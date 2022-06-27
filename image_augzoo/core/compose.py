@@ -1,3 +1,5 @@
+from typing import List
+
 import torch
 from image_augzoo.core.transform import Transform
 
@@ -5,9 +7,9 @@ from image_augzoo.core.transform import Transform
 class Compose:
     transforms: list
 
-    def __init__(self, *transforms: Transform) -> None:
+    def __init__(self, transforms: List[Transform]) -> None:
         assert len(transforms) > 0
-        self.transforms = list(transforms)
+        self.transforms = transforms
 
     def __call__(self, inputs: torch.Tensor) -> torch.Tensor:
         for transform in self.transforms:
