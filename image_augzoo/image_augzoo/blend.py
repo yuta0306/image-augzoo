@@ -56,18 +56,17 @@ class Blend(DualTransform):
                 0, self.rgb_range
             )
             refs = (
-                c.repeat((1, 1, input_.size(2), input_.size(3))) for input_ in inputs
+                c.repeat((1, 1, input_.size(-2), input_.size(-1))) for input_ in inputs
             )
         else:
             c = torch.empty((3, 1, 1), device=inputs[0].device).uniform_(
                 0, self.rgb_range
             )
-            refs = (c.repeat((1, input_.size(1), input_.size(2))) for input_ in inputs)
+            refs = (
+                c.repeat((1, input_.size(-2), input_.size(-1))) for input_ in inputs
+            )
 
-        if is_batched:
-            v = np.random.uniform(self.alpha, 1)
-        else:
-            v = np.random.uniform(self.alpha, 1)
+        v = torch.empty(1).uniform_(self.alpha, 1)
         transformed = tuple(
             v * input_ + (1 - v) * ref for (input_, ref) in zip(inputs, refs)
         )
