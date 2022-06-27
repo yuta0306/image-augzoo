@@ -7,7 +7,7 @@ class Transform:
     def __init__(self, *args: Any, p: float = 0.5, **kwargs) -> None:
         ...
 
-    def __call__(self, inputs: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+    def __call__(self, *args, **kwargs) -> torch.Tensor:
         raise NotImplementedError
 
     def __repr__(self) -> str:
@@ -21,3 +21,14 @@ class Transform:
             string += f"    {key}={value}\n"
         string += ")"
         return string
+
+
+class DualTransform(Transform):
+    def __init__(self, *args: Any, p: float = 0.5, **kwargs) -> None:
+        super().__init__(*args, p=p, **kwargs)
+
+    def __call__(self, *args, **kwargs) -> torch.Tensor:
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return super().__repr__()
