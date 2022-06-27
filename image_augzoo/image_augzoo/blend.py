@@ -59,6 +59,7 @@ class Blend(DualTransform):
                 c.repeat((1, 1, input_.size(-2), input_.size(-1))) for input_ in inputs
             )
         else:
+            bs = 1
             c = torch.empty((3, 1, 1), device=inputs[0].device).uniform_(
                 0, self.rgb_range
             )
