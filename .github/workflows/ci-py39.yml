@@ -18,9 +18,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Run pytest
         run: poetry run pytest
+      - name: Update README
+        run: poetry run python update_readme.py
       - run: |
-          ls -a
-          ls assets
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
