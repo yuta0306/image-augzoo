@@ -1,12 +1,17 @@
+from typing import Tuple
+
 import cv2
 import matplotlib.pyplot as plt
 import torch
 
 
-def load_image(path: str, size: tuple[int, int]):
+def load_image(path: str, size: Tuple[int, int], SR: bool = False):
     image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = cv2.resize(image, size)
+    if SR:
+        image = cv2.resize(image, (size[0] // 4, size[1] // 4))
+        image = cv2.resize(image, size)
     image = torch.from_numpy(image)
     image = image.transpose(1, 2).transpose(0, 1)
     return image

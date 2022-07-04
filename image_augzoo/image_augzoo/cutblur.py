@@ -37,7 +37,7 @@ class CutBlur(MultiTransform):
         super().__init__(p=p)
 
     def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
-        assert len(inputs) % 2 == 0
+        assert len(inputs) == 2
         if self.alpha <= 0 or torch.rand(1) > self.p:
             return inputs
         device = inputs[0].device
@@ -48,8 +48,8 @@ class CutBlur(MultiTransform):
         cy = random.randint(0, h - ch + 1)
         cx = random.randint(0, w - cw + 1)
 
-        inputs_org = (input_ for input_ in inputs[::2])
-        inputs_ref = (input_ for input_ in inputs[1::2])
+        inputs_org = inputs[0]
+        inputs_ref = inputs[1]
         # apply CutBlur to inside or outside
         if torch.rand(1) > 0.5:
             mask = torch.zeros(inputs[0].size(), device=device)
@@ -57,20 +57,18 @@ class CutBlur(MultiTransform):
         else:
             mask = torch.ones(inputs[0].size(), device=device)
             mask[..., cy : cy + ch, cx : cx + cw] = 0
-        transformed = tuple(
-            input_.where(mask == 0, input_ref)
-            for input_, input_ref in zip(inputs_org, inputs_ref)
-        )
-        return transformed
+
+        return (inputs_org.where(mask == 0, inputs_ref),)
 
     def apply_batch(self, *inputs: torch.Tensor, **kwargs):
+        assert len(inputs) == 2
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
             return inputs
 
-        h, w = inputs[0].size(-2), inputs[0].size(-1)
+        c, h, w = inputs[0].size(-3), inputs[0].size(-2), inputs[0].size(-1)
         chs = (
             (h * (torch.randn(bs, device=device) * 0.01 + self.alpha))
             .to(torch.int16)
@@ -84,9 +82,6 @@ class CutBlur(MultiTransform):
         cys = (random.randint(0, h - ch + 1) for ch in chs)
         cxs = (random.randint(0, w - cw + 1) for cw in cws)
 
-        inputs_org = (input_ for input_ in inputs)
-        perm = torch.randperm(bs, device=device)
-        inputs_ref = (input_[perm, ...].clone() for input_ in inputs)
         # apply CutBlur to inside or outside
         mask = torch.zeros(inputs[0].size(), device=device)
         for b, cy, cx, ch, cw in zip(range(bs), cys, cxs, chs, cws):
@@ -95,13 +90,12 @@ class CutBlur(MultiTransform):
             else:
                 mask[b, ...] = 1
                 mask[b, :, cy : cy + ch, cx : cx + cw] = 0
-        transformed = tuple(
-            input_.where(mask == 0, input_ref).where(
-                (probs < self.p)
-                .view(-1, 1, 1, 1)
-                .expand(bs, input_.size(1), input_.size(2), input_.size(3)),
-                input_,
-            )
-            for input_, input_ref in zip(inputs_org, inputs_ref)
+
+        return (
+            inputs[0]
+            .where(mask == 0, inputs[1])
+            .where(
+                (probs < self.p).view(-1, 1, 1, 1).expand(bs, c, h, w),
+                inputs[0],
+            ),
         )
-        return transformed
