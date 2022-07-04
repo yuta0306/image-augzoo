@@ -6,63 +6,81 @@ Image Augmentation Zoo
 
 ## original
 
-![image04.jpg](https://github.com/yuta0306/image-augzoo/assets/image04.jpg)![image03.jpg](https://github.com/yuta0306/image-augzoo/assets/image03.jpg)![image05.jpg](https://github.com/yuta0306/image-augzoo/assets/image05.jpg)![image06.jpg](https://github.com/yuta0306/image-augzoo/assets/image06.jpg)![image01.jpg](https://github.com/yuta0306/image-augzoo/assets/image01.jpg)![image02.jpg](https://github.com/yuta0306/image-augzoo/assets/image02.jpg)
+![image04.jpg](assets/image04.jpg)![image03.jpg](assets/image03.jpg)![image05.jpg](assets/image05.jpg)![image06.jpg](assets/image06.jpg)![image01.jpg](assets/image01.jpg)![image02.jpg](assets/image02.jpg)
 
 ## cutmix
 
 ### cutmix_batch
 
-![cutmix_batch](https://github.com/yuta0306/image-augzoo/assets/cutmix/cutmix_batch.png)
+![cutmix_batch](assets/cutmix/cutmix_batch.png)
 
 ### cutmix_single_sr
 
-![cutmix_single_sr](https://github.com/yuta0306/image-augzoo/assets/cutmix/cutmix_single_sr.png)
+![cutmix_single_sr](assets/cutmix/cutmix_single_sr.png)
 
 ### cutmix_single
 
-![cutmix_single](https://github.com/yuta0306/image-augzoo/assets/cutmix/cutmix_single.png)
+![cutmix_single](assets/cutmix/cutmix_single.png)
 
 ### cutmix_batch_v2
 
-![cutmix_batch_v2](https://github.com/yuta0306/image-augzoo/assets/cutmix/cutmix_batch_v2.png)
+![cutmix_batch_v2](assets/cutmix/cutmix_batch_v2.png)
 
 ### cutmix_batch_p
 
-![cutmix_batch_p](https://github.com/yuta0306/image-augzoo/assets/cutmix/cutmix_batch_p.png)
+![cutmix_batch_p](assets/cutmix/cutmix_batch_p.png)
 
 ## cutblur
 
 ### cutblur_batch
 
-![cutblur_batch](https://github.com/yuta0306/image-augzoo/assets/cutblur/cutblur_batch.png)
+![cutblur_batch](assets/cutblur/cutblur_batch.png)
 
 ### cutblur_batch_p
 
-![cutblur_batch_p](https://github.com/yuta0306/image-augzoo/assets/cutblur/cutblur_batch_p.png)
+![cutblur_batch_p](assets/cutblur/cutblur_batch_p.png)
 
 ### cutblur_single
 
-![cutblur_single](https://github.com/yuta0306/image-augzoo/assets/cutblur/cutblur_single.png)
+![cutblur_single](assets/cutblur/cutblur_single.png)
 
 ## blend
 
 ### blend_single
 
-![blend_single](https://github.com/yuta0306/image-augzoo/assets/blend/blend_single.png)
+![blend_single](assets/blend/blend_single.png)
 
 ### blend_batch_v2
 
-![blend_batch_v2](https://github.com/yuta0306/image-augzoo/assets/blend/blend_batch_v2.png)
+![blend_batch_v2](assets/blend/blend_batch_v2.png)
 
 ### blend_batch_uint
 
-![blend_batch_uint](https://github.com/yuta0306/image-augzoo/assets/blend/blend_batch_uint.png)
+![blend_batch_uint](assets/blend/blend_batch_uint.png)
 
 ### blend_batch
 
-![blend_batch](https://github.com/yuta0306/image-augzoo/assets/blend/blend_batch.png)
+![blend_batch](assets/blend/blend_batch.png)
 
 ### blend_batch_p
 
-![blend_batch_p](https://github.com/yuta0306/image-augzoo/assets/blend/blend_batch_p.png)
+![blend_batch_p](assets/blend/blend_batch_p.png)
+
+## cutout
+
+### cutout_single_sr
+
+![cutout_single_sr](assets/cutout/cutout_single_sr.png)
+
+### cutout_single
+
+![cutout_single](assets/cutout/cutout_single.png)
+
+### cutout_batch
+
+![cutout_batch](assets/cutout/cutout_batch.png)
+
+### cutout_batch_p
+
+![cutout_batch_p](assets/cutout/cutout_batch_p.png)
 
