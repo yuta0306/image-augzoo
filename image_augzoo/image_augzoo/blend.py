@@ -70,7 +70,7 @@ class Blend(MultiTransform):
                 + (1 - v).repeat(1, input_.size(1), input_.size(2), input_.size(3))
                 * ref
             ).where(
-                (probs > self.p)
+                (probs < self.p)
                 .view(-1, 1, 1, 1)
                 .expand(bs, input_.size(1), input_.size(2), input_.size(3)),
                 input_,
