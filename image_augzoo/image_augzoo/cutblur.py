@@ -1,12 +1,12 @@
+import random
 from typing import Tuple
 
-import numpy as np
 import torch
 
-from image_augzoo.core.transform import DualTransform
+from image_augzoo.core.transform import MultiTransform
 
 
-class CutBlur(DualTransform):
+class CutBlur(MultiTransform):
     """
     CutBlur
 
@@ -30,46 +30,78 @@ class CutBlur(DualTransform):
         alpha : float
         expand : bool
         """
-        self.p = p
         self.alpha = alpha
         self.expand = expand
         if expand:
             raise NotImplementedError("ToDo")
+        super().__init__(p=p)
 
-    def __call__(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
-        if self.alpha <= 0 or np.random.rand(1) >= self.p:
+    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+        assert len(inputs) % 2 == 0
+        if self.alpha <= 0 or torch.rand(1) > self.p:
             return inputs
-        assert len(inputs) > 2
-        is_batched = inputs[0].ndim == 4
         device = inputs[0].device
-
-        if is_batched:
-            bs = inputs[0].size(0)
-            perm = torch.randperm(bs)
-            inputs_org = (input_.clone() for input_ in inputs)
-            inputs_ref = (input_[perm, ...] for input_ in inputs)
 
         cut_ratio = torch.randn(1, device=device) * 0.01 + self.alpha
         h, w = inputs[0].size(-2), inputs[0].size(-1)
-        ch, cw = torch.tensor(
-            h * cut_ratio, dtype=torch.int16, device=device
-        ), torch.tensor(w * cut_ratio, dtype=torch.int16, device=device)
-        cy = torch.randint(0, h - ch + 1, device=device)
-        cx = torch.randint(0, w - cw + 1, device=device)
+        ch, cw = int(h * cut_ratio), int(w * cut_ratio)
+        cy = random.randint(0, h - ch + 1)
+        cx = random.randint(0, w - cw + 1)
 
+        inputs_org = (input_ for input_ in inputs[::2])
+        inputs_ref = (input_ for input_ in inputs[1::2])
         # apply CutBlur to inside or outside
-        if torch.randn(1) > 0.5:
-            inputs_org[..., cy : cy + ch, cx : cx + cw] = inputs_ref[
-                ..., cy : cy + ch, cx : cx + cw
-            ]
+        if torch.rand(1) > 0.5:
+            mask = torch.zeros(inputs[0].size(), device=device)
+            mask[..., cy : cy + ch, cx : cx + cw] = 1
         else:
-            LR_aug = HR.clone()
-            LR_aug[..., cy : cy + ch, cx : cx + cw] = LR[
-                ..., cy : cy + ch, cx : cx + cw
-            ]
-            LR = LR_aug
+            mask = torch.ones(inputs[0].size(), device=device)
+            mask[..., cy : cy + ch, cx : cx + cw] = 0
+        transformed = tuple(
+            input_.where(mask == 0, input_ref)
+            for input_, input_ref in zip(inputs_org, inputs_ref)
+        )
+        return transformed
 
-        if self.expand:
-            return LR, HR
-        LR = T.Resize(LR_size)(LR)
-        return LR, HR
+    def apply_batch(self, *inputs: torch.Tensor, **kwargs):
+        bs = inputs[0].size(0)
+        device = inputs[0].device
+        probs = torch.rand(bs, device=device)
+        if self.alpha <= 0 or (probs > self.p).all():
+            return inputs
+
+        h, w = inputs[0].size(-2), inputs[0].size(-1)
+        chs = (
+            (h * (torch.randn(bs, device=device) * 0.01 + self.alpha))
+            .to(torch.int16)
+            .tolist()
+        )
+        cws = (
+            (w * (torch.randn(bs, device=device) * 0.01 + self.alpha))
+            .to(torch.int16)
+            .tolist()
+        )
+        cys = (random.randint(0, h - ch + 1) for ch in chs)
+        cxs = (random.randint(0, w - cw + 1) for cw in cws)
+
+        inputs_org = (input_ for input_ in inputs)
+        perm = torch.randperm(bs, device=device)
+        inputs_ref = (input_[perm, ...].clone() for input_ in inputs)
+        # apply CutBlur to inside or outside
+        mask = torch.zeros(inputs[0].size(), device=device)
+        for b, cy, cx, ch, cw in zip(range(bs), cys, cxs, chs, cws):
+            if torch.rand(1) > 0.5:
+                mask[b, :, cy : cy + ch, cx : cx + cw] = 1
+            else:
+                mask[b, ...] = 1
+                mask[b, :, cy : cy + ch, cx : cx + cw] = 0
+        transformed = tuple(
+            input_.where(mask == 0, input_ref).where(
+                (probs < self.p)
+                .view(-1, 1, 1, 1)
+                .expand(bs, input_.size(1), input_.size(2), input_.size(3)),
+                input_,
+            )
+            for input_, input_ref in zip(inputs_org, inputs_ref)
+        )
+        return transformed
