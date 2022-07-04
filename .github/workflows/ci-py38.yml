@@ -2,7 +2,7 @@ name: "python 3.8"
 on: push
 
 jobs:
-  python39:
+  python38:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

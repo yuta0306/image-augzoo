@@ -15,7 +15,7 @@ def test_cutblur_single():
     LR = load_image("assets/image01.jpg", (128, 128), SR=True) / 255.0
     processed = cutblur(LR, HR)
     assert isinstance(processed, tuple)
-    assert len(processed) == 1
+    assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
     assert HR.size() == processed[0].size()
     save_image(
@@ -35,7 +35,7 @@ def test_cutblur_batch():
 
     processed = cutblur(LR, HR)
     assert isinstance(processed, tuple)
-    assert len(processed) == 1
+    assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
     assert HR.size() == processed[0].size()
 
@@ -57,7 +57,7 @@ def test_cutblur_batch_p():
 
     processed = cutblur(LR, HR)
     assert isinstance(processed, tuple)
-    assert len(processed) == 1
+    assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
     assert HR.size() == processed[0].size()
 

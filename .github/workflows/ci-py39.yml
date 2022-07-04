@@ -18,12 +18,12 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Run pytest
         run: poetry run pytest
-      - uses: actions/checkout@v2
       - run: |
-          ls
+          ls -a
           ls assets
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
           git commit -m "update assets"
+          git pull
           git push
