@@ -1,0 +1,27 @@
+name: "python 3.9"
+on: push
+
+jobs:
+  python39:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.13
+      - name: Install Dependencies
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Run pytest
+        run: poetry run pytest
+      - name: Update assets
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add assets
+          git commit -m "update assets"
+          git push
