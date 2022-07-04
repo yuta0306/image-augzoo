@@ -36,11 +36,11 @@ def generate_markdown(data: Dict[str, List[str]]) -> str:
         for image in images:
             # subtitle
             if method == "original":
-                string += f"![{image}](https://github.com/yuta0306/image-augzoo/{cdir}/{image})"
+                string += f"![{image}]({cdir}/{image})"
             else:
                 subtitle = image.replace(".png", "").replace(".jpg", "")
                 string += f"### {subtitle}\n\n"
-                string += f"![{subtitle}](https://github.com/yuta0306/image-augzoo/{cdir}/{image})\n\n"
+                string += f"![{subtitle}]({cdir}/{image})\n\n"
         if method == "original":
             string += "\n\n"
 
