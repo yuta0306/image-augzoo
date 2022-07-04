@@ -23,85 +23,91 @@ def test_cutmix_single():
     )
 
 
-# def test_cutmix_single_sr():
-#     cutmix = cutmix()
-#     image = load_image("assets/image01.jpg", (128, 128)) / 255.0
-#     ref = load_image("assets/image02.jpg", (128, 128)) / 255.0
-#     LR, LR_ref, HR, HR_ref = image, ref, image, ref
-#     processed = cutmix(LR, LR_ref, HR, HR_ref)
-#     assert isinstance(processed, tuple)
-#     assert len(processed) == 2
-#     assert isinstance(processed[0], torch.Tensor)
-#     assert image.size() == processed[0].size()
-#     save_image(
-#         os.path.join(save_to, "cutmix_single_sr.png"),
-#         3,
-#         1.0,
-#         LR,
-#         LR_ref,
-#         processed[0],
-#         HR,
-#         HR_ref,
-#         processed[1],
-#     )
+def test_cutmix_single_sr():
+    cutmix = CutMix()
+    HR = load_image("assets/image01.jpg", (128, 128)) / 255.0
+    LR = load_image("assets/image01.jpg", (128, 128), SR=True) / 255.0
+    HR_ref = load_image("assets/image02.jpg", (128, 128)) / 255.0
+    LR_ref = load_image("assets/image02.jpg", (128, 128), SR=True) / 255.0
+    processed = cutmix(LR, LR_ref, HR, HR_ref)
+    assert isinstance(processed, tuple)
+    assert len(processed) == 2
+    assert isinstance(processed[0], torch.Tensor)
+    assert LR.size() == processed[0].size()
+    save_image(
+        os.path.join(save_to, "cutmix_single_sr.png"),
+        3,
+        1.0,
+        LR,
+        LR_ref,
+        processed[0],
+        HR,
+        HR_ref,
+        processed[1],
+    )
 
 
-# def test_cutmix_batch():
-#     cutmix = cutmix()
-#     images = [
-#         load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)
-#     ]
-#     images = torch.stack(images)
+def test_cutmix_batch():
+    cutmix = CutMix()
+    LR = [
+        load_image(f"assets/image0{i}.jpg", (128, 128), SR=True) / 255.0
+        for i in range(1, 4)
+    ]
+    HR = [load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)]
+    LR = torch.stack(LR)
+    HR = torch.stack(HR)
 
-#     processed = cutmix(images)
-#     assert isinstance(processed, tuple)
-#     assert len(processed) == 1
-#     assert isinstance(processed[0], torch.Tensor)
-#     assert images.size() == processed[0].size()
+    processed = cutmix(LR, HR)
+    assert isinstance(processed, tuple)
+    assert len(processed) == 2
+    assert isinstance(processed[0], torch.Tensor)
+    assert LR.size() == processed[0].size()
 
-#     tiles = []
-#     for i in range(len(images)):
-#         tiles.extend([images[i], processed[0][i]])
-#     save_image(os.path.join(save_to, "cutmix_batch.png"), 2, 1.0, *tiles)
-
-
-# def test_cutmix_batch_v2():
-#     cutmix = cutmix()
-#     images = [
-#         load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)
-#     ]
-#     images_ref = [
-#         load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)
-#     ]
-#     images = torch.stack(images)
-#     images_ref = torch.stack(images_ref)
-
-#     processed = cutmix(images, images_ref)
-#     assert isinstance(processed, tuple)
-#     assert len(processed) == 2
-#     assert isinstance(processed[0], torch.Tensor)
-#     assert isinstance(processed[1], torch.Tensor)
-
-#     tiles = []
-#     for i in range(len(images)):
-#         tiles.extend([images[i], images_ref[i], processed[0][i], processed[1][i]])
-#     save_image(os.path.join(save_to, "cutmix_batch_v2.png"), 4, 1.0, *tiles)
+    tiles = []
+    for i in range(len(LR)):
+        tiles.extend([LR[i], HR[i], processed[0][i], processed[1][i]])
+    save_image(os.path.join(save_to, "cutmix_batch.png"), 4, 1.0, *tiles)
 
 
-# def test_cutmix_batch_p():
-#     cutmix = cutmix(p=0.2)
-#     images = [
-#         load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)
-#     ]
-#     images = torch.stack(images)
+def test_cutmix_batch_v2():
+    cutmix = CutMix()
+    LR = [
+        load_image(f"assets/image0{i}.jpg", (128, 128), SR=True) / 255.0
+        for i in range(1, 4)
+    ]
+    HR = [load_image(f"assets/image0{i}.jpg", (256, 256)) / 255.0 for i in range(1, 4)]
+    LR = torch.stack(LR)
+    HR = torch.stack(HR)
 
-#     processed = cutmix(images)
-#     assert isinstance(processed, tuple)
-#     assert len(processed) == 1
-#     assert isinstance(processed[0], torch.Tensor)
-#     assert images.size() == processed[0].size()
+    processed = cutmix(LR, HR)
+    assert isinstance(processed, tuple)
+    assert len(processed) == 2
+    assert isinstance(processed[0], torch.Tensor)
+    assert LR.size() == processed[0].size()
 
-#     tiles = []
-#     for i in range(len(images)):
-#         tiles.extend([images[i], processed[0][i]])
-#     save_image(os.path.join(save_to, "cutmix_batch_p.png"), 2, 1.0, *tiles)
+    tiles = []
+    for i in range(len(LR)):
+        tiles.extend([LR[i], HR[i], processed[0][i], processed[1][i]])
+    save_image(os.path.join(save_to, "cutmix_batch_v2.png"), 4, 1.0, *tiles)
+
+
+def test_cutmix_batch_p():
+    cutmix = CutMix(p=0.2)
+    LR = [
+        load_image(f"assets/image0{i}.jpg", (128, 128), SR=True) / 255.0
+        for i in range(1, 4)
+    ]
+    HR = [load_image(f"assets/image0{i}.jpg", (128, 128)) / 255.0 for i in range(1, 4)]
+    LR = torch.stack(LR)
+    HR = torch.stack(HR)
+
+    processed = cutmix(LR, HR)
+    assert isinstance(processed, tuple)
+    assert len(processed) == 2
+    assert isinstance(processed[0], torch.Tensor)
+    assert LR.size() == processed[0].size()
+
+    tiles = []
+    for i in range(len(LR)):
+        tiles.extend([LR[i], HR[i], processed[0][i], processed[1][i]])
+    save_image(os.path.join(save_to, "cutmix_batch_p.png"), 4, 1.0, *tiles)
