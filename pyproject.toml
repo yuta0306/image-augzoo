@@ -12,6 +12,7 @@ numpy = "^1.23.0"
 opencv-python = "^4.6.0"
 matplotlib = "^3.5.2"
 albumentations = "^1.2.0"
+timm = "^0.5.4"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

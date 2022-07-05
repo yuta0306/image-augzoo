@@ -1,5 +1,6 @@
 from .core import Compose, Identity, Oneof, Transform
 from .image_augzoo import (
+    AttentiveCutMix,
     Blend,
     CutBlur,
     CutMix,
@@ -10,6 +11,7 @@ from .image_augzoo import (
 )
 
 __all__ = [
+    "AttentiveCutMix",
     "Compose",
     "Transform",
     "Blend",

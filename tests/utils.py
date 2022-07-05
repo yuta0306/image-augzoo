@@ -33,6 +33,7 @@ def make_tile(*image: torch.Tensor, cols: int = 2, range_: float = 1.0):
     rows = max(1, len(images) // cols)
     fig, axes = plt.subplots(rows, cols)
     for ax, image in zip(axes.flatten(), images):
+        ax.axis("off")
         ax.imshow(image)
     plt.tight_layout()
     return fig
