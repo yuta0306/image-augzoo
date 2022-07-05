@@ -14,7 +14,7 @@ class Mixup(MultiTransform):
     alpha : float
     """
 
-    def __init__(self, p: float = 1.0, alpha: float = 1.2):
+    def __init__(self, p: float = 1.0, alpha: float = 1.2, soft_label: bool = False):
         """
         Parameters
         ----------
@@ -22,6 +22,7 @@ class Mixup(MultiTransform):
         alpha : float
         """
         self.alpha = alpha
+        self.soft_label = soft_label
         super().__init__(p=p)
 
     def apply(
@@ -35,6 +36,12 @@ class Mixup(MultiTransform):
 
         inputs_org = (input_ for input_ in inputs[::2])
         inputs_ref = (input_ for input_ in inputs[1::2])
+
+        labels = kwargs.get("labels")
+        labels_ref = kwargs.get("labels_ref")
+        if self.soft_label and labels is not None and labels_ref is not None:
+            labels = v * labels.float() + (1 - v) * labels_ref.float()
+            kwargs["labels"] = labels
 
         return (
             tuple(
@@ -64,6 +71,12 @@ class Mixup(MultiTransform):
         perm = torch.randperm(bs, device=device)
         inputs_org = (input_.clone() for input_ in inputs)
         inputs_ref = (input_[perm] for input_ in inputs)
+
+        labels = kwargs.get("labels")
+        if self.soft_label and labels is not None:
+            labels_ref = labels[perm]
+            labels = v * labels.float() + (1 - v) * labels_ref.float()
+            kwargs["labels"] = labels
 
         return (
             tuple(

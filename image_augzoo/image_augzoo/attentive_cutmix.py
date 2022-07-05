@@ -29,6 +29,7 @@ class AttentiveCutMix(MultiTransform):
         grid_size: Tuple[int, int] = (32, 32),
         top_k: int = 6,
         p: float = 1.0,
+        soft_label: bool = False,
     ) -> None:
         """
         Parameters
@@ -47,6 +48,10 @@ class AttentiveCutMix(MultiTransform):
             patch * grid for patch, grid in zip(patch_size, grid_size)
         )
         self.top_k = top_k
+        self.soft_label = soft_label
+        self.total = 1
+        for num in patch_size:
+            self.total *= num
         super().__init__(p=p)
 
     @torch.inference_mode()
@@ -54,10 +59,11 @@ class AttentiveCutMix(MultiTransform):
         last_feature_map = self.model(inputs)[:, -1, :, :]
         return last_feature_map
 
-    def _get_top_k_region(self, inputs: torch.Tensor) -> torch.Tensor:
+    def _get_top_k_region(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, int]:
         bs = inputs.size(0)
         values, indices = inputs.view(bs, -1).topk(k=self.top_k, dim=-1)
         region = torch.zeros((bs, 3, *self.image_size))
+        i = 0
         for i, indice in enumerate(indices):
             for idx in indice:
                 region[i][
@@ -65,7 +71,7 @@ class AttentiveCutMix(MultiTransform):
                     idx * self.grid_size[0] : (idx + 1) * self.grid_size[0],
                     idx * self.grid_size[1] : (idx + 1) * self.grid_size[1],
                 ] = 1
-        return region
+        return region, i + 1
 
     def apply(
         self, *inputs: torch.Tensor, **kwargs
@@ -84,7 +90,15 @@ class AttentiveCutMix(MultiTransform):
         )
 
         features_map = self._get_feature_map(inputs[0].unsqueeze(dim=0))
-        region = self._get_top_k_region(features_map)[0]
+        region, replaced = self._get_top_k_region(features_map)
+        region = region[0]
+
+        labels = kwargs.get("labels")
+        if self.soft_label and labels is not None:
+            labels = labels[0].float() * (replaced / self.total) + labels[1].float() * (
+                (self.total - replaced) / self.total
+            )
+            kwargs["labels"] = labels
 
         return (
             tuple(
@@ -123,7 +137,14 @@ class AttentiveCutMix(MultiTransform):
                 inputs[0][perm]
             )
         )
-        region = self._get_top_k_region(features_map)
+        region, replaced = self._get_top_k_region(features_map)
+
+        labels = kwargs.get("labels")
+        if self.soft_label and labels is not None:
+            labels = labels.float() * (replaced / self.total) + labels[perm].float() * (
+                (self.total - replaced) / self.total
+            )
+            kwargs["labels"] = labels
 
         return (
             tuple(

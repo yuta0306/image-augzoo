@@ -18,7 +18,7 @@ class RICAP(MultiTransform):
     beta: float
     """
 
-    def __init__(self, p: float = 1.0, beta: float = 0.3):
+    def __init__(self, p: float = 1.0, beta: float = 0.3, soft_label: bool = False):
         """
         Parameters
         ----------
@@ -26,6 +26,7 @@ class RICAP(MultiTransform):
         beta : float
         """
         self.beta = beta
+        self.soft_label = soft_label
         super().__init__(p=p)
 
     def apply(
@@ -72,6 +73,16 @@ class RICAP(MultiTransform):
                 ..., boundary_w : boundary_w + w4, boundary_h : boundary_h + h4
             ] = inputs[i + 3][..., x4 : x4 + w4, y4 : y4 + h4]
             transformed.append(background)
+
+        labels = kwargs.get("labels")
+        if self.soft_label and labels is not None:
+            labels = (
+                labels[0].float() * (w1 * h1) / (w * h)
+                + labels[1].float() * (w2 * h2) / (w * h)
+                + labels[2].float() * (w3 * h3) / (w * h)
+                + labels[3].float() * (w4 * h4) / (w * h)
+            )
+            kwargs["labels"] = labels
 
         return tuple(transformed), kwargs
 
@@ -150,6 +161,7 @@ class RICAP(MultiTransform):
                 boundary_w[b] : boundary_w[b] + w4[b],
                 boundary_h[b] : boundary_h[b] + h4[b],
             ] = 3
+
         return (
             tuple(
                 self._shift_image(input_, ref1, ref2, ref3, *pos)
