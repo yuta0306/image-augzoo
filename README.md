@@ -44,6 +44,42 @@ Image Augmentation Zoo
 
 ![cutblur_single](assets/cutblur/cutblur_single.png)
 
+## cutmixup
+
+### cutmixup_batch_p
+
+![cutmixup_batch_p](assets/cutmixup/cutmixup_batch_p.png)
+
+### cutmixup_single
+
+![cutmixup_single](assets/cutmixup/cutmixup_single.png)
+
+### cutmixup_single_sr
+
+![cutmixup_single_sr](assets/cutmixup/cutmixup_single_sr.png)
+
+### cutmixup_batch
+
+![cutmixup_batch](assets/cutmixup/cutmixup_batch.png)
+
+## mixup
+
+### mixup_batch
+
+![mixup_batch](assets/mixup/mixup_batch.png)
+
+### mixup_batch_p
+
+![mixup_batch_p](assets/mixup/mixup_batch_p.png)
+
+### mixup_single
+
+![mixup_single](assets/mixup/mixup_single.png)
+
+### mixup_single_sr
+
+![mixup_single_sr](assets/mixup/mixup_single_sr.png)
+
 ## blend
 
 ### blend_single
