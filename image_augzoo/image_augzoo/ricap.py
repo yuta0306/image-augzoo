@@ -28,11 +28,13 @@ class RICAP(MultiTransform):
         self.beta = beta
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         assert len(inputs) == 4
         h, w = inputs[0].size()[-2:]
         if self.beta <= 0 or torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
         device = inputs[0].device
 
         boundary_h, boundary_w = np.random.beta(self.beta, self.beta, (2,))
@@ -56,38 +58,40 @@ class RICAP(MultiTransform):
             round(np.random.uniform(0, h - h4)),
         )
 
-        background = torch.zeros_like(inputs[0], device=device)
-        background[..., :w1, :h1] = inputs[0][..., x1 : x1 + w1, y1 : y1 + h1]
-        background[..., boundary_w : boundary_w + w2, :h2] = inputs[1][
-            ..., x2 : x2 + w2, y2 : y2 + h2
-        ]
-        background[..., :w3, boundary_h : boundary_h + h3] = inputs[2][
-            ..., x3 : x3 + w3, y3 : y3 + h3
-        ]
-        background[
-            ..., boundary_w : boundary_w + w4, boundary_h : boundary_h + h4
-        ] = inputs[3][..., x4 : x4 + w4, y4 : y4 + h4]
+        transformed = []
+        for i in range(np.floor(len(inputs) / 4).astype(int)):
+            background = torch.zeros_like(inputs[i], device=device)
+            background[..., :w1, :h1] = inputs[i][..., x1 : x1 + w1, y1 : y1 + h1]
+            background[..., boundary_w : boundary_w + w2, :h2] = inputs[i + 1][
+                ..., x2 : x2 + w2, y2 : y2 + h2
+            ]
+            background[..., :w3, boundary_h : boundary_h + h3] = inputs[i + 2][
+                ..., x3 : x3 + w3, y3 : y3 + h3
+            ]
+            background[
+                ..., boundary_w : boundary_w + w4, boundary_h : boundary_h + h4
+            ] = inputs[i + 3][..., x4 : x4 + w4, y4 : y4 + h4]
+            transformed.append(background)
 
-        return (background,)
+        return tuple(transformed), kwargs
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs, _, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         boundary_h, boundary_w = np.random.beta(self.beta, self.beta, (2, bs))
         boundary_h, boundary_w = (boundary_h * h).astype(int), (boundary_w * w).astype(
             int
         )
-        print(boundary_h, boundary_w)
         w1 = w3 = boundary_w
         w2 = w4 = w - boundary_w
         h1 = h2 = boundary_h
         h3 = h4 = h - boundary_h
-        print(w1, w2, w3, w4)
-        print(h1, h2, h3, h4)
         x1, y1 = np.random.uniform(0, w - w1, (bs,)).astype(int), np.random.uniform(
             0, h - h1, (bs,)
         ).astype(int)
@@ -103,8 +107,27 @@ class RICAP(MultiTransform):
             np.random.uniform(0, w - w4, (bs,)).astype(int),
             np.random.uniform(0, h - h4, (bs,)).astype(int),
         )
-        print(x1, x2, x3, x4)
-        print(y1, y2, y3, y4)
+
+        pos = [
+            boundary_w,
+            boundary_h,
+            x1,
+            x2,
+            x3,
+            x4,
+            y1,
+            y2,
+            y3,
+            y4,
+            w1,
+            w2,
+            w3,
+            w4,
+            h1,
+            h2,
+            h3,
+            h4,
+        ]
 
         inputs_ref1 = (
             input_[torch.arange(0, bs).repeat(2)[1 : 1 + bs]] for input_ in inputs
@@ -127,11 +150,93 @@ class RICAP(MultiTransform):
                 boundary_w[b] : boundary_w[b] + w4[b],
                 boundary_h[b] : boundary_h[b] + h4[b],
             ] = 3
-        return tuple(
-            input_.where((mask == 0), ref1)
-            .where(((mask == 0) | (mask == 1)), ref2)
-            .where(((mask == 0) | (mask == 1) | (mask == 2)), ref3)
-            for input_, ref1, ref2, ref3 in zip(
-                inputs, inputs_ref1, inputs_ref2, inputs_ref3
-            )
+        return (
+            tuple(
+                self._shift_image(input_, ref1, ref2, ref3, *pos)
+                for input_, ref1, ref2, ref3 in zip(
+                    inputs, inputs_ref1, inputs_ref2, inputs_ref3
+                )
+            ),
+            kwargs,
         )
+
+    def _shift_image(
+        self,
+        image: torch.Tensor,
+        ref1: torch.Tensor,
+        ref2: torch.Tensor,
+        ref3: torch.Tensor,
+        boundary_w,
+        boundary_h,
+        x1,
+        x2,
+        x3,
+        x4,
+        y1,
+        y2,
+        y3,
+        y4,
+        w1,
+        w2,
+        w3,
+        w4,
+        h1,
+        h2,
+        h3,
+        h4,
+    ):
+        backgroud = torch.zeros_like(image)
+        for b, (
+            bbdw,
+            bbdh,
+            bx1,
+            bx2,
+            bx3,
+            bx4,
+            by1,
+            by2,
+            by3,
+            by4,
+            bw1,
+            bw2,
+            bw3,
+            bw4,
+            bh1,
+            bh2,
+            bh3,
+            bh4,
+        ) in enumerate(
+            zip(
+                boundary_w,
+                boundary_h,
+                x1,
+                x2,
+                x3,
+                x4,
+                y1,
+                y2,
+                y3,
+                y4,
+                w1,
+                w2,
+                w3,
+                w4,
+                h1,
+                h2,
+                h3,
+                h4,
+            )
+        ):
+            backgroud[b][..., :bw1, :bh1] = image[b][
+                ..., bx1 : bx1 + bw1, by1 : by1 + bh1
+            ]
+            backgroud[b][..., bbdw : bbdw + bw2, :bh2] = ref1[b][
+                ..., bx2 : bx2 + bw2, by2 : by2 + bh2
+            ]
+            backgroud[b][..., :bw3, bbdh : bbdh + bh3] = ref2[b][
+                ..., bx3 : bx3 + bw3, by3 : by3 + bh3
+            ]
+            backgroud[b][..., bbdw : bbdw + bw4, bbdh : bbdh + bh4] = ref3[b][
+                ..., bx4 : bx4 + bw4, by4 : by4 + bh4
+            ]
+        return backgroud

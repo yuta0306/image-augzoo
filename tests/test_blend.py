@@ -12,7 +12,7 @@ os.makedirs(save_to, exist_ok=True)
 def test_blend_single():
     blend = Blend()
     image = load_image("assets/image01.jpg", (128, 128)) / 255.0
-    processed = blend(image)
+    processed, _ = blend(image)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -27,7 +27,7 @@ def test_blend_batch():
     ]
     images = torch.stack(images)
 
-    processed = blend(images)
+    processed, _ = blend(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -50,7 +50,7 @@ def test_blend_batch_v2():
     images = torch.stack(images)
     images_ref = torch.stack(images_ref)
 
-    processed = blend(images, images_ref)
+    processed, _ = blend(images, images_ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -69,7 +69,7 @@ def test_blend_batch_p():
     ]
     images = torch.stack(images)
 
-    processed = blend(images)
+    processed, _ = blend(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -88,7 +88,7 @@ def test_blend_batch_uint():
     ]
     images = torch.stack(images)
 
-    processed = blend(images)
+    processed, _ = blend(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)

@@ -13,7 +13,7 @@ def test_mixup_single():
     mixup = Mixup()
     image = load_image("assets/image01.jpg", (128, 128)) / 255.0
     ref = load_image("assets/image02.jpg", (128, 128)) / 255.0
-    processed = mixup(image, ref)
+    processed, _ = mixup(image, ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -29,7 +29,7 @@ def test_mixup_single_sr():
     LR = load_image("assets/image01.jpg", (128, 128), SR=True) / 255.0
     HR_ref = load_image("assets/image02.jpg", (128, 128)) / 255.0
     LR_ref = load_image("assets/image02.jpg", (128, 128), SR=True) / 255.0
-    processed = mixup(LR, LR_ref, HR, HR_ref)
+    processed, _ = mixup(LR, LR_ref, HR, HR_ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -57,7 +57,7 @@ def test_mixup_batch():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = mixup(LR, HR)
+    processed, _ = mixup(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -79,7 +79,7 @@ def test_mixup_batch_p():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = mixup(LR, HR)
+    processed, _ = mixup(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)

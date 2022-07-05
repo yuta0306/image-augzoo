@@ -30,9 +30,11 @@ class Cutout(MultiTransform):
         self.alpha = alpha
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         if self.alpha <= 0 or torch.rand(1) >= self.p:
-            return inputs
+            return inputs, kwargs
 
         LR = inputs[0]
         cutout = np.random.choice(
@@ -40,16 +42,21 @@ class Cutout(MultiTransform):
         )
         mask = torch.tensor(cutout, dtype=torch.float32, device=LR.device)
 
-        return tuple(
-            input_ * mask if i == 0 else input_ for i, input_ in enumerate(inputs)
+        return (
+            tuple(
+                input_ * mask if i == 0 else input_ for i, input_ in enumerate(inputs)
+            ),
+            kwargs,
         )
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         LR = inputs[0]
         cutout = np.random.choice(
@@ -57,12 +64,15 @@ class Cutout(MultiTransform):
         ).repeat(3, axis=1)
         mask = torch.tensor(cutout, dtype=torch.float32, device=LR.device)
 
-        return tuple(
-            (input_ * mask).where(
-                (probs < self.p).view(-1, 1, 1, 1).expand(bs, c, h, w),
-                input_,
-            )
-            if i == 0
-            else input_
-            for i, input_ in enumerate(inputs)
+        return (
+            tuple(
+                (input_ * mask).where(
+                    (probs < self.p).view(-1, 1, 1, 1).expand(bs, c, h, w),
+                    input_,
+                )
+                if i == 0
+                else input_
+                for i, input_ in enumerate(inputs)
+            ),
+            kwargs,
         )

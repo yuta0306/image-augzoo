@@ -12,7 +12,7 @@ os.makedirs(save_to, exist_ok=True)
 def test_rgb_permutation_single():
     rgb_permutation = RGBPermutation()
     image = load_image("assets/image01.jpg", (128, 128)) / 255.0
-    processed = rgb_permutation(image)
+    processed, _ = rgb_permutation(image)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -30,7 +30,7 @@ def test_rgb_permutation_single_sr():
     rgb_permutation = RGBPermutation()
     HR = load_image("assets/image01.jpg", (128, 128)) / 255.0
     LR = load_image("assets/image01.jpg", (128, 128), SR=True) / 255.0
-    processed = rgb_permutation(LR, HR)
+    processed, _ = rgb_permutation(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -54,7 +54,7 @@ def test_rgb_permutation_batch():
     ]
     images = torch.stack(images)
 
-    processed = rgb_permutation(images)
+    processed, _ = rgb_permutation(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -77,7 +77,7 @@ def test_rgb_permutation_batch_v2():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = rgb_permutation(LR, HR)
+    processed, _ = rgb_permutation(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -99,7 +99,7 @@ def test_rgb_permutation_batch_p():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = rgb_permutation(LR, HR)
+    processed, _ = rgb_permutation(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)

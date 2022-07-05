@@ -36,9 +36,11 @@ class CutBlur(DualTransform):
             raise NotImplementedError("ToDo")
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         if self.alpha <= 0 or torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
         device = inputs[0].device
 
         cut_ratio = torch.randn(1, device=device) * 0.01 + self.alpha
@@ -57,14 +59,16 @@ class CutBlur(DualTransform):
             mask = torch.ones(inputs[0].size(), device=device)
             mask[..., cy : cy + ch, cx : cx + cw] = 0
 
-        return (LR.where(mask == 0, HR), HR)
+        return (LR.where(mask == 0, HR), HR), kwargs
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         c, h, w = inputs[0].size(-3), inputs[0].size(-2), inputs[0].size(-1)
         chs = (
@@ -97,4 +101,4 @@ class CutBlur(DualTransform):
                 LR,
             ),
             HR,
-        )
+        ), kwargs

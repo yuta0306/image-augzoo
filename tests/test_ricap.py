@@ -15,7 +15,7 @@ def test_ricap_single():
     image2 = load_image("assets/image02.jpg", (128, 128)) / 255.0
     image3 = load_image("assets/image03.jpg", (128, 128)) / 255.0
     image4 = load_image("assets/image04.jpg", (128, 128)) / 255.0
-    processed = ricap(image, image2, image3, image4)
+    processed, _ = ricap(image, image2, image3, image4)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -39,7 +39,7 @@ def test_ricap_batch():
     ]
     images = torch.stack(images)
 
-    processed = ricap(images)
+    processed, _ = ricap(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -63,7 +63,7 @@ def test_ricap_batch_v2():
     images = torch.stack(images)
     images_ref = torch.stack(images_ref)
 
-    processed = ricap(images, images_ref)
+    processed, _ = ricap(images, images_ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -82,7 +82,7 @@ def test_ricap_batch_p():
     ]
     images = torch.stack(images)
 
-    processed = ricap(images)
+    processed, _ = ricap(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)

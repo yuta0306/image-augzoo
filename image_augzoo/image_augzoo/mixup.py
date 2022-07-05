@@ -24,9 +24,11 @@ class Mixup(MultiTransform):
         self.alpha = alpha
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         if self.alpha <= 0 or torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
 
         dist = torch.distributions.beta.Beta(self.alpha, self.alpha)
         v = dist.sample()
@@ -34,17 +36,22 @@ class Mixup(MultiTransform):
         inputs_org = (input_ for input_ in inputs[::2])
         inputs_ref = (input_ for input_ in inputs[1::2])
 
-        return tuple(
-            v * input_ + (1 - v) * input_ref
-            for input_, input_ref in zip(inputs_org, inputs_ref)
+        return (
+            tuple(
+                v * input_ + (1 - v) * input_ref
+                for input_, input_ref in zip(inputs_org, inputs_ref)
+            ),
+            kwargs,
         )
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         dist = torch.distributions.beta.Beta(self.alpha, self.alpha)
         v = (
@@ -58,12 +65,15 @@ class Mixup(MultiTransform):
         inputs_org = (input_.clone() for input_ in inputs)
         inputs_ref = (input_[perm] for input_ in inputs)
 
-        return tuple(
-            (v * input_ + (1 - v) * input_ref).where(
-                (probs < self.p)
-                .view(-1, 1, 1, 1)
-                .expand(bs, c, input_.size(-2), input_.size(-1)),
-                input_,
-            )
-            for input_, input_ref in zip(inputs_org, inputs_ref)
+        return (
+            tuple(
+                (v * input_ + (1 - v) * input_ref).where(
+                    (probs < self.p)
+                    .view(-1, 1, 1, 1)
+                    .expand(bs, c, input_.size(-2), input_.size(-1)),
+                    input_,
+                )
+                for input_, input_ref in zip(inputs_org, inputs_ref)
+            ),
+            kwargs,
         )

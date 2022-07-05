@@ -9,13 +9,19 @@ class Transform:
         assert 0.0 <= p <= 1.0
         self.p = p
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         raise NotImplementedError
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         raise NotImplementedError
 
-    def __call__(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def __call__(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         is_batched = inputs[0].ndim == 4
         if is_batched:
             try:
@@ -45,7 +51,9 @@ class DualTransform(Transform):
     def __init__(self, *args: Any, p: float = 1.0, **kwargs) -> None:
         super().__init__(*args, p=p, **kwargs)
 
-    def __call__(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def __call__(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         assert len(inputs) == 2
         return super().__call__(*inputs, **kwargs)
 
@@ -57,7 +65,9 @@ class MultiTransform(Transform):
     def __init__(self, *args: Any, p: float = 1.0, **kwargs) -> None:
         super().__init__(*args, p=p, **kwargs)
 
-    def __call__(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def __call__(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         return super().__call__(*inputs, **kwargs)
 
     def __repr__(self) -> str:

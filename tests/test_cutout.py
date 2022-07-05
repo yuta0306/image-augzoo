@@ -12,7 +12,7 @@ os.makedirs(save_to, exist_ok=True)
 def test_cutout_single():
     cutout = Cutout()
     image = load_image("assets/image01.jpg", (128, 128)) / 255.0
-    processed = cutout(image)
+    processed, _ = cutout(image)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -30,7 +30,7 @@ def test_cutout_single_sr():
     cutout = Cutout()
     HR = load_image("assets/image01.jpg", (128, 128)) / 255.0
     LR = load_image("assets/image01.jpg", (128, 128), SR=True) / 255.0
-    processed = cutout(LR, HR)
+    processed, _ = cutout(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -56,7 +56,7 @@ def test_cutout_batch():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = cutout(LR, HR)
+    processed, _ = cutout(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -78,7 +78,7 @@ def test_cutout_batch_p():
     LR = torch.stack(LR)
     HR = torch.stack(HR)
 
-    processed = cutout(LR, HR)
+    processed, _ = cutout(LR, HR)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)

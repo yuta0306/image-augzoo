@@ -30,10 +30,12 @@ class CutMix(MultiTransform):
         self.alpha = alpha
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         assert len(inputs) % 2 == 0
         if torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
         device = inputs[0].device
 
         cut_ratio = torch.randn(1, device=device) * 0.01 + self.alpha
@@ -58,14 +60,16 @@ class CutMix(MultiTransform):
             for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
         )
 
-        return transformed
+        return transformed, kwargs
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         chs = (
             (h * (torch.randn(bs, device=device) * 0.01 + self.alpha))
@@ -105,4 +109,4 @@ class CutMix(MultiTransform):
             for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
         )
 
-        return transformed
+        return transformed, kwargs

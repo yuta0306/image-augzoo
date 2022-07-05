@@ -67,9 +67,11 @@ class AttentiveCutMix(MultiTransform):
                 ] = 1
         return region
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         if torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
 
         sizes = (input_.size()[-2:] for input_ in inputs[::2])
         inputs_org = (
@@ -84,19 +86,24 @@ class AttentiveCutMix(MultiTransform):
         features_map = self._get_feature_map(inputs[0].unsqueeze(dim=0))
         region = self._get_top_k_region(features_map)[0]
 
-        return tuple(
-            T.Resize(size=size, interpolation=T.InterpolationMode.NEAREST)(
-                region * input_org + (1 - region) * input_ref
-            )
-            for input_org, input_ref, size in zip(inputs_org, inputs_ref, sizes)
+        return (
+            tuple(
+                T.Resize(size=size, interpolation=T.InterpolationMode.NEAREST)(
+                    region * input_org + (1 - region) * input_ref
+                )
+                for input_org, input_ref, size in zip(inputs_org, inputs_ref, sizes)
+            ),
+            kwargs,
         )
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         sizes = (input_.size()[-2:] for input_ in inputs)
         perm = torch.randperm(bs)
@@ -118,14 +125,17 @@ class AttentiveCutMix(MultiTransform):
         )
         region = self._get_top_k_region(features_map)
 
-        return tuple(
-            T.Resize(size=size, interpolation=T.InterpolationMode.NEAREST)(
-                region * input_ + (1 - region) * input_ref
-            ).where(
-                (probs < self.p)
-                .view(-1, 1, 1, 1)
-                .expand(bs, 3, input_.size(-2), input_.size(-1)),
-                input_,
-            )
-            for input_, input_ref, size in zip(inputs_org, inputs_ref, sizes)
+        return (
+            tuple(
+                T.Resize(size=size, interpolation=T.InterpolationMode.NEAREST)(
+                    region * input_ + (1 - region) * input_ref
+                ).where(
+                    (probs < self.p)
+                    .view(-1, 1, 1, 1)
+                    .expand(bs, 3, input_.size(-2), input_.size(-1)),
+                    input_,
+                )
+                for input_, input_ref, size in zip(inputs_org, inputs_ref, sizes)
+            ),
+            kwargs,
         )

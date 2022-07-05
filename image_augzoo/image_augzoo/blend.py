@@ -42,9 +42,11 @@ class Blend(MultiTransform):
         self.rgb_range = rgb_range
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         if self.alpha <= 0 or torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
         device = inputs[0].device
         c = torch.empty((3, 1, 1), device=device).uniform_(0, self.rgb_range)
         refs = (c.repeat((1, input_.size(-2), input_.size(-1))) for input_ in inputs)
@@ -54,14 +56,16 @@ class Blend(MultiTransform):
             v * input_ + (1 - v) * ref for (input_, ref) in zip(inputs, refs)
         )
 
-        return transformed
+        return transformed, kwargs
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
         c = torch.empty((bs, 3, 1, 1), device=device).uniform_(0, self.rgb_range)
         refs = (c.repeat((1, 1, input_.size(-2), input_.size(-1))) for input_ in inputs)
 
@@ -80,4 +84,4 @@ class Blend(MultiTransform):
             for input_, ref in zip(inputs, refs)
         )
 
-        return transformed
+        return transformed, kwargs

@@ -13,7 +13,7 @@ def test_attentive_cutmix_single():
     attentive_cutmix = AttentiveCutMix()
     image = load_image("assets/image01.jpg", (224, 224)) / 255.0
     ref = load_image("assets/image06.jpg", (224, 224)) / 255.0
-    processed = attentive_cutmix(image, ref)
+    processed, _ = attentive_cutmix(image, ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -34,7 +34,7 @@ def test_attentive_cutmix_single_sr():
     LR = load_image("assets/image01.jpg", (224, 224), SR=True) / 255.0
     HR_ref = load_image("assets/image06.jpg", (224, 224)) / 255.0
     LR_ref = load_image("assets/image06.jpg", (224, 224), SR=True) / 255.0
-    processed = attentive_cutmix(LR, LR_ref, HR, HR_ref)
+    processed, _ = attentive_cutmix(LR, LR_ref, HR, HR_ref)
     assert isinstance(processed, tuple)
     assert len(processed) == 2
     assert isinstance(processed[0], torch.Tensor)
@@ -60,7 +60,7 @@ def test_attentive_cutmix_batch():
     ]
     images = torch.stack(images)
 
-    processed = attentive_cutmix(images)
+    processed, _ = attentive_cutmix(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -80,7 +80,7 @@ def test_attentive_cutmix_batch_p():
     ]
     images = torch.stack(images)
 
-    processed = attentive_cutmix(images)
+    processed, _ = attentive_cutmix(images)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)

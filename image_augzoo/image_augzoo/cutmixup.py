@@ -37,10 +37,12 @@ class CutMixup(MultiTransform):
         self.cutmix_alpha = cutmix_alpha
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         assert len(inputs) % 2 == 0
         if torch.rand(1) > self.p:
-            return inputs
+            return inputs, kwargs
         device = inputs[0].device
 
         # mixup
@@ -81,17 +83,22 @@ class CutMixup(MultiTransform):
                     tcx * scale : (tcx + cw) * scale,
                 ] = 0
 
-        return tuple(
-            input_.where(mask == 0, input_ref)
-            for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
+        return (
+            tuple(
+                input_.where(mask == 0, input_ref)
+                for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
+            ),
+            kwargs,
         )
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
+    def apply_batch(
+        self, *inputs: torch.Tensor, **kwargs
+    ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
         bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if (probs > self.p).all():
-            return inputs
+            return inputs, kwargs
 
         # mixup
         dist = torch.distributions.beta.Beta(self.mixup_alpha, self.mixup_alpha)
@@ -150,12 +157,15 @@ class CutMixup(MultiTransform):
                         fcx * scale : (fcx + cw) * scale,
                     ] = 0
 
-        return tuple(
-            input_.where(mask == 0, input_ref).where(
-                (probs < self.p)
-                .view(-1, 1, 1, 1)
-                .expand(bs, c, input_.size(-2), input_.size(-1)),
-                input_,
-            )
-            for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
+        return (
+            tuple(
+                input_.where(mask == 0, input_ref).where(
+                    (probs < self.p)
+                    .view(-1, 1, 1, 1)
+                    .expand(bs, c, input_.size(-2), input_.size(-1)),
+                    input_,
+                )
+                for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
+            ),
+            kwargs,
         )
