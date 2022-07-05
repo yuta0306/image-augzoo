@@ -1,4 +1,3 @@
-import warnings
 from typing import Tuple
 
 import torch
@@ -26,7 +25,6 @@ class AttentiveCutMix(MultiTransform):
 
     def __init__(
         self,
-        model_name: str = "resnet50",
         patch_size: Tuple[int, int] = (7, 7),
         grid_size: Tuple[int, int] = (32, 32),
         top_k: int = 6,
@@ -41,16 +39,6 @@ class AttentiveCutMix(MultiTransform):
         top_k : int, default=6
         p : float, default=1.0
         """
-        if model_name != "resnet50":
-            warnings.warn(
-                "AttentiveCutMix is implemented only for ResNet50", UserWarning
-            )
-        # self.model = timm.create_model(
-        #     model_name=model_name,
-        #     pretrained=True,
-        #     features_only=True,
-        #     out_indices=[-1],
-        # )
         model = torchvision.models.resnet50(pretrained=True)
         self.model = nn.Sequential(*list(model.children())[:-2])
         self.patch_size = patch_size
