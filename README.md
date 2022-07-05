@@ -8,6 +8,24 @@ Image Augmentation Zoo
 
 ![image04.jpg](assets/image04.jpg)![image03.jpg](assets/image03.jpg)![image05.jpg](assets/image05.jpg)![image06.jpg](assets/image06.jpg)![image01.jpg](assets/image01.jpg)![image02.jpg](assets/image02.jpg)
 
+## attentive_cutmix
+
+### attentive_cutmix_single_sr
+
+![attentive_cutmix_single_sr](assets/attentive_cutmix/attentive_cutmix_single_sr.png)
+
+### attentive_cutmix_single
+
+![attentive_cutmix_single](assets/attentive_cutmix/attentive_cutmix_single.png)
+
+### attentive_cutmix_batch_p
+
+![attentive_cutmix_batch_p](assets/attentive_cutmix/attentive_cutmix_batch_p.png)
+
+### attentive_cutmix_batch
+
+![attentive_cutmix_batch](assets/attentive_cutmix/attentive_cutmix_batch.png)
+
 ## cutmix
 
 ### cutmix_batch
