@@ -61,13 +61,12 @@ class CutMix(MultiTransform):
         return transformed
 
     def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
-        bs = inputs[0].size(0)
+        bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
             return inputs
 
-        h, w = inputs[0].size(-2), inputs[0].size(-1)
         chs = (
             (h * (torch.randn(bs, device=device) * 0.01 + self.alpha))
             .to(torch.int16)
@@ -97,7 +96,12 @@ class CutMix(MultiTransform):
                 ] = 1
 
         transformed = tuple(
-            input_.where(mask == 0, input_ref)
+            input_.where(mask == 0, input_ref).where(
+                (probs < self.p)
+                .view(-1, 1, 1, 1)
+                .expand(bs, c, input_.size(-2), input_.size(-1)),
+                input_,
+            )
             for input_, input_ref, mask in zip(inputs_org, inputs_ref, masks)
         )
 

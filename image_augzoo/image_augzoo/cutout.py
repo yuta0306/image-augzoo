@@ -45,19 +45,24 @@ class Cutout(MultiTransform):
         )
 
     def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
-        bs = inputs[0].size(0)
+        bs, c, h, w = inputs[0].size()
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
         if self.alpha <= 0 or (probs > self.p).all():
             return inputs
 
         LR = inputs[0]
-        h, w = inputs[0].size(-2), inputs[0].size(-1)
         cutout = np.random.choice(
             [0.0, 1.0], size=(bs, 1, h, w), p=[self.alpha, 1 - self.alpha]
         ).repeat(3, axis=1)
         mask = torch.tensor(cutout, dtype=torch.float32, device=LR.device)
 
         return tuple(
-            input_ * mask if i == 0 else input_ for i, input_ in enumerate(inputs)
+            (input_ * mask).where(
+                (probs < self.p).view(-1, 1, 1, 1).expand(bs, c, h, w),
+                input_,
+            )
+            if i == 0
+            else input_
+            for i, input_ in enumerate(inputs)
         )
