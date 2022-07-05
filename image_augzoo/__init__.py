@@ -1,5 +1,6 @@
 from .core import Compose, Identity, Oneof, Transform
 from .image_augzoo import (
+    RICAP,
     AttentiveCutMix,
     Blend,
     CutBlur,
@@ -23,4 +24,5 @@ __all__ = [
     "RGBPermutation",
     "Mixup",
     "CutMixup",
+    "RICAP",
 ]

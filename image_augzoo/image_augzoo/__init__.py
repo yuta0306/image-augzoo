@@ -6,6 +6,7 @@ from .cutmixup import CutMixup
 from .cutout import Cutout
 from .mixup import Mixup
 from .rgb_permutation import RGBPermutation
+from .ricap import RICAP
 
 __all__ = [
     "AttentiveCutMix",
@@ -16,4 +17,5 @@ __all__ = [
     "RGBPermutation",
     "Mixup",
     "CutMixup",
+    "RICAP",
 ]
