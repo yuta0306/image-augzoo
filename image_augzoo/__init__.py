@@ -1,5 +1,13 @@
 from .core import Compose, Identity, Oneof, Transform
-from .image_augzoo import Blend, CutBlur, CutMix, Cutout, Mixup, RGBPermutation
+from .image_augzoo import (
+    Blend,
+    CutBlur,
+    CutMix,
+    CutMixup,
+    Cutout,
+    Mixup,
+    RGBPermutation,
+)
 
 __all__ = [
     "Compose",
@@ -12,4 +20,5 @@ __all__ = [
     "Cutout",
     "RGBPermutation",
     "Mixup",
+    "CutMixup",
 ]

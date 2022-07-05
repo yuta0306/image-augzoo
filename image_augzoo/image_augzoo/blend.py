@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import torch
 
 from image_augzoo.core.transform import MultiTransform
@@ -40,7 +42,7 @@ class Blend(MultiTransform):
         self.rgb_range = rgb_range
         super().__init__(p=p)
 
-    def apply(self, *inputs: torch.Tensor, **kwargs):
+    def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
         if self.alpha <= 0 or torch.rand(1) > self.p:
             return inputs
         device = inputs[0].device
@@ -54,7 +56,7 @@ class Blend(MultiTransform):
 
         return transformed
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs):
+    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)

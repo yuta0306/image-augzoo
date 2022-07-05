@@ -59,7 +59,7 @@ class CutBlur(DualTransform):
 
         return (LR.where(mask == 0, HR), HR)
 
-    def apply_batch(self, *inputs: torch.Tensor, **kwargs):
+    def apply_batch(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)

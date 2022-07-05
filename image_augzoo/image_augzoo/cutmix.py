@@ -1,6 +1,6 @@
-import random
 from typing import Tuple
 
+import numpy as np
 import torch
 
 from image_augzoo.core.transform import MultiTransform
@@ -40,8 +40,8 @@ class CutMix(MultiTransform):
         h, w = inputs[0].size(-2), inputs[0].size(-1)
         ch, cw = int(h * cut_ratio), int(w * cut_ratio)
 
-        fcy = random.randint(0, h - ch + 1)
-        fcx = random.randint(0, w - cw + 1)
+        fcy = np.random.randint(0, h - ch + 1)
+        fcx = np.random.randint(0, w - cw + 1)
         tcy, tcx = fcy, fcx
 
         inputs_org = (input_ for input_ in inputs[::2])
@@ -78,8 +78,8 @@ class CutMix(MultiTransform):
             .tolist()
         )
 
-        fcys = [random.randint(0, h - ch + 1) for ch in chs]
-        fcxs = [random.randint(0, w - cw + 1) for cw in cws]
+        fcys = [np.random.randint(0, h - ch + 1) for ch in chs]
+        fcxs = [np.random.randint(0, w - cw + 1) for cw in cws]
 
         perm = torch.randperm(bs, device=device)
         inputs_org = (input_.clone() for input_ in inputs)

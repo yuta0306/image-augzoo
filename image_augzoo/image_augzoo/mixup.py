@@ -24,9 +24,6 @@ class Mixup(MultiTransform):
         self.alpha = alpha
         super().__init__(p=p)
 
-    def __call__(self, *inputs: torch.Tensor, **kwargs):
-        return super().__call__(*inputs, **kwargs)
-
     def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
         if self.alpha <= 0 or torch.rand(1) > self.p:
             return inputs
