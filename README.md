@@ -84,3 +84,21 @@ Image Augmentation Zoo
 
 ![cutout_batch_p](assets/cutout/cutout_batch_p.png)
 
+## rgb_permutation
+
+### rgb_permutation_batch_p
+
+![rgb_permutation_batch_p](assets/rgb_permutation/rgb_permutation_batch_p.png)
+
+### rgb_permutation_single
+
+![rgb_permutation_single](assets/rgb_permutation/rgb_permutation_single.png)
+
+### rgb_permutation_single_sr
+
+![rgb_permutation_single_sr](assets/rgb_permutation/rgb_permutation_single_sr.png)
+
+### rgb_permutation_batch
+
+![rgb_permutation_batch](assets/rgb_permutation/rgb_permutation_batch.png)
+
