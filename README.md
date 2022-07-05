@@ -80,6 +80,24 @@ Image Augmentation Zoo
 
 ![cutmixup_batch](assets/cutmixup/cutmixup_batch.png)
 
+## ricap
+
+### ricap_batch_p
+
+![ricap_batch_p](assets/ricap/ricap_batch_p.png)
+
+### ricap_single
+
+![ricap_single](assets/ricap/ricap_single.png)
+
+### ricap_batch_v2
+
+![ricap_batch_v2](assets/ricap/ricap_batch_v2.png)
+
+### ricap_batch
+
+![ricap_batch](assets/ricap/ricap_batch.png)
+
 ## mixup
 
 ### mixup_batch
