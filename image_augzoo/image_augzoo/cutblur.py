@@ -3,10 +3,10 @@ from typing import Tuple
 
 import torch
 
-from image_augzoo.core.transform import MultiTransform
+from image_augzoo.core.transform import DualTransform
 
 
-class CutBlur(MultiTransform):
+class CutBlur(DualTransform):
     """
     CutBlur
 
@@ -37,7 +37,6 @@ class CutBlur(MultiTransform):
         super().__init__(p=p)
 
     def apply(self, *inputs: torch.Tensor, **kwargs) -> Tuple[torch.Tensor, ...]:
-        assert len(inputs) == 2
         if self.alpha <= 0 or torch.rand(1) > self.p:
             return inputs
         device = inputs[0].device
@@ -61,7 +60,6 @@ class CutBlur(MultiTransform):
         return (LR.where(mask == 0, HR), HR)
 
     def apply_batch(self, *inputs: torch.Tensor, **kwargs):
-        assert len(inputs) == 2
         bs = inputs[0].size(0)
         device = inputs[0].device
         probs = torch.rand(bs, device=device)
