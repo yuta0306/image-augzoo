@@ -156,6 +156,28 @@ Image Augmentation Zoo
 
 ![cutout_batch_p](assets/cutout/cutout_batch_p.png)
 
+## bcplus_mix
+
+### bcplus_mix_batch_v2
+
+![bcplus_mix_batch_v2](assets/bcplus_mix/bcplus_mix_batch_v2.png)
+
+### bcplus_mix_single_sr
+
+![bcplus_mix_single_sr](assets/bcplus_mix/bcplus_mix_single_sr.png)
+
+### bcplus_mix_batch
+
+![bcplus_mix_batch](assets/bcplus_mix/bcplus_mix_batch.png)
+
+### bcplus_mix_single
+
+![bcplus_mix_single](assets/bcplus_mix/bcplus_mix_single.png)
+
+### bcplus_mix_batch_p
+
+![bcplus_mix_batch_p](assets/bcplus_mix/bcplus_mix_batch_p.png)
+
 ## rgb_permutation
 
 ### rgb_permutation_batch_p
