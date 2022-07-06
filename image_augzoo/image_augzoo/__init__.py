@@ -6,6 +6,7 @@ from .cutmix import CutMix
 from .cutmixup import CutMixup
 from .cutout import Cutout
 from .mixup import Mixup
+from .random_pixels import RandomPixels
 from .rgb_permutation import RGBPermutation
 from .ricap import RICAP
 
@@ -19,5 +20,6 @@ __all__ = [
     "RGBPermutation",
     "Mixup",
     "CutMixup",
+    "RandomPixels",
     "RICAP",
 ]

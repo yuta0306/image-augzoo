@@ -1,26 +1,34 @@
 from typing import Tuple
 
+import numpy as np
 import torch
 
 from image_augzoo.core.transform import MultiTransform
 
 
-class Mixup(MultiTransform):
+class RandomPixels(MultiTransform):
     """
-    Mixup
+    RandomPixels
+
     Attributes
     ----------
     p : float
     alpha : float
     """
 
-    def __init__(self, p: float = 1.0, alpha: float = 1.2, soft_label: bool = False):
+    def __init__(
+        self,
+        p: float = 1.0,
+        alpha: float = 0.5,
+        soft_label: bool = True,
+    ):
         """
         Parameters
         ----------
         p : float
         alpha : float
         """
+        assert 0 <= alpha <= 1
         self.alpha = alpha
         self.soft_label = soft_label
         super().__init__(p=p)
@@ -28,23 +36,28 @@ class Mixup(MultiTransform):
     def apply(
         self, *inputs: torch.Tensor, **kwargs
     ) -> Tuple[Tuple[torch.Tensor, ...], dict]:
-        if self.alpha <= 0 or torch.rand(1) > self.p:
+        if self.alpha <= 0 or torch.rand(1) >= self.p:
             return inputs, kwargs
+        device = inputs[0].device
 
-        dist = torch.distributions.beta.Beta(self.alpha, self.alpha)
-        v = dist.sample()
+        cutout = np.random.choice(
+            [0.0, 1.0], size=inputs[0].size()[1:], p=[self.alpha, 1 - self.alpha]
+        )
+        mask = torch.tensor(cutout, dtype=torch.float32, device=device)
 
         inputs_org = (input_ for input_ in inputs[::2])
         inputs_ref = (input_ for input_ in inputs[1::2])
 
         labels = kwargs.get("labels")
         if self.soft_label and labels is not None:
-            labels = v * labels[0].float() + (1 - v) * labels[1].float()
+            labels = (
+                self.alpha * labels[0].float() + (1 - self.alpha) * labels[1].float()
+            )
             kwargs["labels"] = labels
 
         return (
             tuple(
-                v * input_ + (1 - v) * input_ref
+                mask * input_ + (1 - mask) * input_ref
                 for input_, input_ref in zip(inputs_org, inputs_ref)
             ),
             kwargs,
@@ -59,33 +72,27 @@ class Mixup(MultiTransform):
         if self.alpha <= 0 or (probs > self.p).all():
             return inputs, kwargs
 
-        dist = torch.distributions.beta.Beta(self.alpha, self.alpha)
-        v = (
-            dist.sample(torch.Size((bs,)))
-            .view(-1, 1, 1, 1)
-            .repeat(1, c, h, w)
-            .to(device)
-        )
+        cutout = np.random.choice(
+            [0.0, 1.0], size=(bs, 1, h, w), p=[self.alpha, 1 - self.alpha]
+        ).repeat(3, axis=1)
+        mask = torch.tensor(cutout, dtype=torch.float32, device=device)
 
-        perm = torch.randperm(bs, device=device)
-        inputs_org = (input_.clone() for input_ in inputs)
+        perm = torch.randperm(bs)
         inputs_ref = (input_[perm] for input_ in inputs)
 
         labels = kwargs.get("labels")
         if self.soft_label and labels is not None:
             labels_ref = labels[perm]
-            labels = v * labels.float() + (1 - v) * labels_ref.float()
+            labels = self.alpha * labels.float() + (1 - self.alpha) * labels_ref.float()
             kwargs["labels"] = labels
 
         return (
             tuple(
-                (v * input_ + (1 - v) * input_ref).where(
-                    (probs < self.p)
-                    .view(-1, 1, 1, 1)
-                    .expand(bs, c, input_.size(-2), input_.size(-1)),
+                (mask * input_ + (1 - mask) * input_ref).where(
+                    (probs < self.p).view(-1, 1, 1, 1).expand(bs, c, h, w),
                     input_,
                 )
-                for input_, input_ref in zip(inputs_org, inputs_ref)
+                for input_, input_ref in zip(inputs, inputs_ref)
             ),
             kwargs,
         )
