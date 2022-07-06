@@ -2,6 +2,7 @@ from .core import Compose, Identity, Oneof, Transform
 from .image_augzoo import (
     RICAP,
     AttentiveCutMix,
+    BCPlusMix,
     Blend,
     CutBlur,
     CutMix,
@@ -15,6 +16,7 @@ __all__ = [
     "AttentiveCutMix",
     "Compose",
     "Transform",
+    "BCPlusMix",
     "Blend",
     "CutBlur",
     "CutMix",
