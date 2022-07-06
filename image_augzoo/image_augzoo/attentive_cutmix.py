@@ -29,7 +29,7 @@ class AttentiveCutMix(MultiTransform):
         grid_size: Tuple[int, int] = (32, 32),
         top_k: int = 6,
         p: float = 1.0,
-        soft_label: bool = False,
+        soft_label: bool = True,
     ) -> None:
         """
         Parameters
@@ -59,19 +59,24 @@ class AttentiveCutMix(MultiTransform):
         last_feature_map = self.model(inputs)[:, -1, :, :]
         return last_feature_map
 
-    def _get_top_k_region(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, int]:
+    def _get_top_k_region(
+        self, inputs: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         bs = inputs.size(0)
         values, indices = inputs.view(bs, -1).topk(k=self.top_k, dim=-1)
         region = torch.zeros((bs, 3, *self.image_size))
         i = 0
+        k_sizes = []
         for i, indice in enumerate(indices):
+            k_sizes.append(len(indice))
             for idx in indice:
                 region[i][
                     ...,
                     idx * self.grid_size[0] : (idx + 1) * self.grid_size[0],
                     idx * self.grid_size[1] : (idx + 1) * self.grid_size[1],
                 ] = 1
-        return region, i + 1
+        top_k = torch.tensor(k_sizes, dtype=torch.long, device=inputs.device)
+        return region, top_k
 
     def apply(
         self, *inputs: torch.Tensor, **kwargs
@@ -92,6 +97,7 @@ class AttentiveCutMix(MultiTransform):
         features_map = self._get_feature_map(inputs[0].unsqueeze(dim=0))
         region, replaced = self._get_top_k_region(features_map)
         region = region[0]
+        replaced = replaced[0]
 
         labels = kwargs.get("labels")
         if self.soft_label and labels is not None:
@@ -138,13 +144,16 @@ class AttentiveCutMix(MultiTransform):
             )
         )
         region, replaced = self._get_top_k_region(features_map)
+        replaced = replaced.view(bs, 1)
 
         labels = kwargs.get("labels")
         if self.soft_label and labels is not None:
             labels = labels.float() * (replaced / self.total) + labels[perm].float() * (
                 (self.total - replaced) / self.total
             )
-            kwargs["labels"] = labels
+            kwargs["labels"] = labels.where(
+                (probs < self.p).view(-1, 1), kwargs["labels"].float()
+            )
 
         return (
             tuple(

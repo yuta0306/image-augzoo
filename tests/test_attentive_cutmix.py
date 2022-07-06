@@ -13,7 +13,8 @@ def test_attentive_cutmix_single():
     attentive_cutmix = AttentiveCutMix()
     image = load_image("assets/image01.jpg", (224, 224)) / 255.0
     ref = load_image("assets/image06.jpg", (224, 224)) / 255.0
-    processed, _ = attentive_cutmix(image, ref)
+    labels = torch.tensor([[1, 0], [0, 1]], dtype=torch.long)
+    processed, kwargs = attentive_cutmix(image, ref, labels=labels)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
@@ -59,8 +60,11 @@ def test_attentive_cutmix_batch():
         for i in range(1, 7)
     ]
     images = torch.stack(images)
+    labels = torch.nn.functional.one_hot(
+        torch.tensor([i for i in range(6)], dtype=torch.long)
+    )
 
-    processed, _ = attentive_cutmix(images)
+    processed, kwargs = attentive_cutmix(images, labels=labels)
     assert isinstance(processed, tuple)
     assert len(processed) == 1
     assert isinstance(processed[0], torch.Tensor)
