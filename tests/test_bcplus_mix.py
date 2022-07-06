@@ -70,7 +70,7 @@ def test_bcplus_mix_batch():
     tiles = []
     for i in range(len(images)):
         tiles.extend([images[i], processed[0][i]])
-    save_image(os.path.join(save_to, "bcplus_mix_batch.png"), 4, 1.0, *tiles)
+    save_image(os.path.join(save_to, "bcplus_mix_batch.png"), 2, 1.0, *tiles)
 
 
 def test_bcplus_mix_batch_v2():
