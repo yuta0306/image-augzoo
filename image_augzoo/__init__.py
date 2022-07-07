@@ -9,6 +9,7 @@ from .image_augzoo import (
     CutMixup,
     Cutout,
     Mixup,
+    RandomElements,
     RandomPixels,
     RGBPermutation,
 )
@@ -27,6 +28,7 @@ __all__ = [
     "RGBPermutation",
     "Mixup",
     "CutMixup",
+    "RandomElements",
     "RandomPixels",
     "RICAP",
 ]
