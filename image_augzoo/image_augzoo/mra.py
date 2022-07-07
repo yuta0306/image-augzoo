@@ -126,7 +126,7 @@ class MRA(MultiTransform):
         )
 
         cls_token, last_hidden_states = self._get_last_hidden_states(
-            inputs[0].unsqueeze(dim=1)
+            inputs[0].unsqueeze(dim=0)
         )
         mask, replaced = self._get_top_k_region(
             cls_token=cls_token, hidden_states=last_hidden_states
