@@ -214,6 +214,32 @@ Image Augmentation Zoo
 
 ![bcplus_mix_batch_p](assets/bcplus_mix/bcplus_mix_batch_p.png)
 
+## mra
+
+### mra_batch
+
+![mra_batch](assets/mra/mra_batch.png)
+
+### mra_single_sr
+
+![mra_single_sr](assets/mra/mra_single_sr.png)
+
+### mra_batch_mask_ratio08
+
+![mra_batch_mask_ratio08](assets/mra/mra_batch_mask_ratio08.png)
+
+### mra_batch_strategy_low
+
+![mra_batch_strategy_low](assets/mra/mra_batch_strategy_low.png)
+
+### mra_batch_p
+
+![mra_batch_p](assets/mra/mra_batch_p.png)
+
+### mra_single
+
+![mra_single](assets/mra/mra_single.png)
+
 ## rgb_permutation
 
 ### rgb_permutation_batch_p
