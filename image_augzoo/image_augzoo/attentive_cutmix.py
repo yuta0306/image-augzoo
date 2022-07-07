@@ -70,10 +70,10 @@ class AttentiveCutMix(MultiTransform):
         for i, indice in enumerate(indices):
             k_sizes.append(len(indice))
             for idx in indice:
+                left = (idx % self.patch_size[0]) * self.grid_size[0]
+                top = (idx // self.patch_size[1]) * self.grid_size[1]
                 region[i][
-                    ...,
-                    idx * self.grid_size[0] : (idx + 1) * self.grid_size[0],
-                    idx * self.grid_size[1] : (idx + 1) * self.grid_size[1],
+                    ..., left : left + self.grid_size[0], top : top + self.grid_size[1]
                 ] = 1
         top_k = torch.tensor(k_sizes, dtype=torch.long, device=inputs.device)
         return region, top_k

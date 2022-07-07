@@ -1,5 +1,6 @@
 from .core import Compose, Identity, Oneof, Transform
 from .image_augzoo import (
+    MRA,
     RICAP,
     AttentiveCutMix,
     BCPlusMix,
@@ -15,6 +16,7 @@ from .image_augzoo import (
 )
 
 __all__ = [
+    "MRA",
     "AttentiveCutMix",
     "Compose",
     "Transform",
