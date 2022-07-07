@@ -116,6 +116,24 @@ Image Augmentation Zoo
 
 ![mixup_single_sr](assets/mixup/mixup_single_sr.png)
 
+## random_pixels
+
+### random_pixels_batch
+
+![random_pixels_batch](assets/random_pixels/random_pixels_batch.png)
+
+### random_pixels_batch_p
+
+![random_pixels_batch_p](assets/random_pixels/random_pixels_batch_p.png)
+
+### random_pixels_single_sr
+
+![random_pixels_single_sr](assets/random_pixels/random_pixels_single_sr.png)
+
+### random_pixels_single
+
+![random_pixels_single](assets/random_pixels/random_pixels_single.png)
+
 ## blend
 
 ### blend_single
